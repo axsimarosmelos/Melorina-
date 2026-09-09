@@ -1,0 +1,48 @@
+# Melorina: next implementation milestones
+
+## 0.1 — Inspectable adaptive prototype
+
+Implemented: three everyday guided scenarios, eight vocabulary items, independent word recognition/recall evidence, hint-aware review, local persistence, recording/replay, responsive interface, and tests.
+
+## 0.2 — Validate the Emirati learning content
+
+- Engage an Emirati language educator to review wording, regional variants, gender/register, accepted answers, and cultural context.
+- Record consented, reusable native audio from multiple speakers and add a content review status/version for each phrase.
+- Add listening-only tasks that never expose the answer in text; track auditory recognition separately from reading.
+- Expand conversations from isolated words to utterance-level goals, including asking for clarification and handling an unexpected reply.
+- Add tests for acceptable alternative expressions, and send uncertain text judgments to a fallback rather than marking them wrong.
+
+Exit criterion: every released task and audio item has an identifiable language reviewer and expected, acceptable, and unsupported answer cases.
+
+## 0.3 — Open-ended conversation and durable accounts
+
+- Add a backend with authenticated users, sessions, events, content versions, learner goals, and learner skill estimates.
+- Keep API credentials exclusively server-side. Use a provider adapter for text generation, speech transcription, and feedback.
+- Let the curriculum selector choose a goal and evidence target; let the conversation service express that goal naturally. Constrain generated exercises to reviewed content and validate their answers.
+- Keep event IDs idempotent, preserve hints and source confidence, and support account export/deletion.
+- Replace the one-page session controller with resumable sessions and add conflict-safe persistence across devices.
+
+Exit criterion: two users have isolated histories; a resumed conversation keeps its learning state; model uncertainty never silently becomes a negative score.
+
+## 0.4 — Meaningful pronunciation personalization
+
+- Compare candidate speech assessment systems against Emirati speaker and teacher judgments before choosing one.
+- Distinguish recording quality, word recognition, intelligibility, dialect variation, and phoneme production.
+- Add confidence thresholds and short diagnostic follow-ups. Unsupported phonemes remain unknown.
+- Introduce sound-to-word relationships so a recurring sound difficulty can guide practice across several familiar words.
+- Keep pronunciation success independent from unaided word recall and spontaneous usage.
+
+Exit criterion: acceptable dialect variants are not routinely penalized, and feedback reliably agrees with qualified human judgment on the target tasks.
+
+## 0.5 — Prove learning benefit
+
+- Compare adaptive and fixed task sequences with equivalent content and practice time.
+- Assess unaided recall after a delay and performance in unfamiliar conversations.
+- Track learning outcomes alongside enjoyment and return rates. Do not substitute session counts for conversational competence.
+- Tune review timing and task selection using measured results, not engagement alone.
+
+## Later expansion
+
+- Additional Arabic varieties: preserve existing evidence but test transfer explicitly; do not copy Emirati mastery into another variety without evidence.
+- Premium workplace scenarios and specialized speaking development.
+- Native mobile packaging when browser-based learning and validated audio flows justify it.

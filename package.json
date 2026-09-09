@@ -1,0 +1,12 @@
+{
+  "name": "melorina",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An adaptive Emirati Arabic conversation prototype",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/engine.test.js tests/controller.test.js",
+    "build": "node scripts/build.js"
+  },
+  "engines": { "node": ">=18" }
+}
