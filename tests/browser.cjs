@@ -54,6 +54,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mk
     await page.locator('#learner-name').fill('Sam <b>');
     await page.locator('#learning-goal').selectOption('Getting around');
     await page.locator('#practice-time').selectOption('5');
+    await page.locator('#conversation-goal').fill('Order breakfast near home');
     await page.locator('#settings-form').evaluate(form=>form.requestSubmit());
     await page.locator('[data-view="today"]').first().click();
     assert.equal(await page.getByRole('heading',{name:'Hello, Sam <b>.'}).count(),1);
@@ -70,11 +71,36 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mk
     await page.locator('[data-view="profile"]').first().click();
     const downloadPromise=page.waitForEvent('download');await page.locator('[data-export]').click();
     const download=await downloadPromise;assert.equal(download.suggestedFilename(),'melorina-progress.json');
+    // New focus loop: partial clue, full model, bounded repair, then continue.
+    await page.locator('[data-view="today"]').first().click();
+    await page.locator('[data-focus]').click();
+    await page.locator('.focus-ribbon').waitFor();
+    assert.match(await page.locator('.page-intro').textContent(),/Order breakfast near home/);
+    await page.locator('[data-view="words"]').click();
+    await page.locator('#word-search').fill('water');
+    await page.locator('[data-focus-word="water"]').click();
+    await page.locator('[data-hint]').click();
+    await page.getByRole('button',{name:'Show me the whole model'}).click();
+    await page.locator('#answer').fill('maay');
+    await page.locator('#answer-form').evaluate(form=>form.requestSubmit());
+    await page.locator('[data-retry]').click();
+    assert.equal(await page.locator('.practice-model').count(),0);
+    await page.locator('#answer').fill('maay');
+    await page.locator('#answer-form').evaluate(form=>form.requestSubmit());
+    assert.match(await page.locator('.feedback').textContent(),/useful rehearsal/);
+    assert.equal(await page.locator('[data-retry]').count(),0);
+    await page.locator('[data-next]').click();
     const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
     const mp=await mobile.newPage();mp.on('pageerror',e=>errors.push(e.message));await mp.goto('http://localhost:4173');
     await mp.screenshot({path:path.join(out,'melorina-mobile.png'),fullPage:true});
     assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await mp.locator('[data-start="hello"]').first().click();
+    await mp.locator('[data-hint]').click();
+    await mp.getByRole('button',{name:'Show me the whole model'}).click();
+    await mp.locator('#answer').fill('marhaba');
+    await mp.locator('#answer-form').evaluate(form=>form.requestSubmit());
+    assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    await mp.locator('[data-retry]').click();
     assert.equal(await mp.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await mp.screenshot({path:path.join(out,'melorina-mobile-conversation.png'),fullPage:true});
     // Standalone build opens without a web server and keeps the learning controls.
@@ -84,6 +110,6 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mk
     await standalone.locator('#answer').fill('marhaba');await standalone.locator('#answer-form').evaluate(form=>form.requestSubmit());
     await standalone.locator('[data-next]').waitFor();
     assert.deepEqual(errors,[]);
-    console.log('PASS: full adaptive flow, hinted evidence, recording/replay, saved progress, preferences, search, practice, export, desktop/mobile layout, and standalone build.');
+    console.log('PASS: full adaptive flow, progressive hints, rehearsal separation, personal goals, focused practice, recording/replay, saved progress, preferences, search, export, desktop/mobile layout, and standalone build.');
   }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

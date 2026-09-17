@@ -31,6 +31,16 @@
         {word:'where',mode:'recall',ar:'',line:'Now you begin your own question.',prompt:'Start with the word for “where”.',context:'street:ask'},
         {word:'thanks',mode:'recall',ar:'',line:'You have the directions you need.',prompt:'Thank the person who helped.',context:'street:thanks'}]}
   ];
-  const content = {words,scenarios,version:1,reviewStatus:'Draft: Emirati educator review required before public release.'};
+  const practiceFrames={
+    hello:{chunks:[{ar:'مرحبا',latin:'marhaba',meaning:'Hello',word:'hello'}],translation:'Hello.',notice:'A single greeting is already a useful conversational unit.',situation:'You arrive at a new neighbour’s home and greet them.',prompt:'What word would you use for “hello”?'},
+    thanks:{chunks:[{ar:'شكراً',latin:'shukran',meaning:'Thank you',word:'thanks'}],translation:'Thank you.',notice:'Keep the whole expression together. It can complete a real exchange.',situation:'A neighbour helps you carry a bag. You want to thank them.',prompt:'How would you say “thank you”?'},
+    name:{chunks:[{ar:'اسمي',latin:'ismi',meaning:'My name is',word:'name'},{ar:'نورة',latin:'Noura',meaning:'Noura'}],translation:'My name is Noura.',notice:'Notice the introduction and the name as two parts. The name can change.',situation:'You join a group for the first time and begin introducing yourself.',prompt:'Write the part meaning “my name is”, before adding your name.'},
+    coffee:{chunks:[{ar:'أبا',latin:'aba',meaning:'I want',word:'want'},{ar:'قهوة',latin:'gahwa',meaning:'Coffee',word:'coffee'}],translation:'I want coffee.',notice:'First the request, then the drink. Work on the drink word before rebuilding the request.',situation:'You are visiting a friend who asks which drink you would like.',prompt:'Give the word for “coffee”.'},
+    water:{chunks:[{ar:'أبا',latin:'aba',meaning:'I want',word:'want'},{ar:'ماي',latin:'maay',meaning:'Water',word:'water'}],translation:'I want water.',notice:'Notice how the drink fits after the request. Focus on the small part you need.',situation:'After a walk, you ask for water at a kiosk.',prompt:'Give the Emirati Arabic word for “water”.'},
+    want:{chunks:[{ar:'أبا',latin:'aba',meaning:'I want',word:'want'},{ar:'ماي',latin:'maay',meaning:'Water',word:'water'}],translation:'I want water.',notice:'The request stays the same when the thing you want changes.',situation:'You are asking for something at a small shop.',prompt:'Start with the words meaning “I want”.'},
+    where:{chunks:[{ar:'وين',latin:'wain',meaning:'Where',word:'where'},{ar:'السوق؟',latin:'as-soog?',meaning:'The market',word:'market'}],translation:'Where is the market?',notice:'Find the question word first, then the place. Practice just the part you are reaching for.',situation:'You ask a neighbour where the market is.',prompt:'Begin your question with the word for “where”.'},
+    market:{chunks:[{ar:'وين',latin:'wain',meaning:'Where',word:'where'},{ar:'السوق؟',latin:'as-soog?',meaning:'The market',word:'market'}],translation:'Where is the market?',notice:'Notice the question and the destination as two small pieces.',situation:'Someone asks which place you are looking for.',prompt:'Tell them “the market”.'}
+  };
+  const content = {words,scenarios,practiceFrames,version:2,reviewStatus:'Draft: Emirati educator review required before public release.'};
   if(typeof module==='object'&&module.exports) module.exports=content; else root.MelorinaContent=content;
 })(typeof globalThis!=='undefined'?globalThis:this);

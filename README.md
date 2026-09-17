@@ -15,7 +15,7 @@ Open http://localhost:4173. The server binds only to your device. `PORT` can sel
 Alternatively, open `dist/melorina.html` directly in a browser after building it. The main app works without a network connection. Recording requires microphone access in a supported browser on localhost or HTTPS; file URLs vary by browser.
 
 ```sh
-node --test tests/engine.test.js tests/controller.test.js
+npm test
 node scripts/build.js
 ```
 
@@ -32,11 +32,24 @@ The included browser test uses Playwright when available: `node tests/browser.cj
 7. Open **Your words** to search or practice a word. **Explore your practice** schedules due reviews, recognition-to-recall transitions, and new material related to your goal.
 8. In **Your preferences**, choose a goal and practice window. In **Your growth**, export your local progress.
 
+## Try focused practice (0.2)
+
+1. In **Your preferences**, add a personal conversation goal, such as ordering breakfast near home. The selected topic guides word suggestions; the free-text goal stays visible as a reminder of why you are practicing.
+2. Choose **Start focused practice** on the dashboard, or **Focus on this word** in **Your words**.
+3. Try one word. Recall hints reveal an initial-letter clue before the full written model. Recent recall attempts that consistently needed help start with the clue already visible.
+4. Read the feedback and the written example in small pieces. After a supported answer or recognition miss, optionally **Hide the model & try again**. You can also continue without retrying.
+5. Practice a different word, then return to the focus word in another situation. If recognition still needs support, the last turn remains a recognition task.
+6. Read your reflection. Immediate retries are saved as rehearsals, separately from independent attempts and review scheduling.
+
+This loop applies ideas from Daniel Coyle's discussion of deep practice. See [the design note](docs/deep-practice.md) for the source, implementation choices, and limits.
+
 ## What works
 
 - Responsive dashboard, three guided conversation scenarios, searchable vocabulary, learner profile, preferences, and session reflection.
 - Arabic and transliterated text input with conservative, explicit accepted variants. Unmatched free text does **not** automatically count as a learning failure.
 - Separate recognition and recall evidence per word, context, hint use, timestamp, and session.
+- Three-turn focused practice, gradual hints, written phrase chunks, and one optional repair per turn.
+- Recent evidence for each word and task guides support; personal conversation goals persist across sessions.
 - Bounded within-session adaptation and a persistent review queue. Same-session repetition cannot establish durable retention.
 - Local progress persistence; JSON export; user-confirmed local reset.
 - Optional microphone recording and replay. Audio remains in memory, is never uploaded, and is discarded when leaving a turn. This is not speech recognition or pronunciation scoring.
@@ -56,13 +69,17 @@ Progress is local to one browser/origin and is not encrypted account storage. Op
 | --- | --- |
 | `src/content.js` | Draft Emirati Arabic vocabulary, aliases, scenarios, and task contexts |
 | `src/engine.js` | Pure evidence updates, review selection, retention labels, and state validation |
+| `src/practice.js` | Focus selection, recent-evidence support, and contextual follow-up planning |
 | `src/app.js` | Interface, guided session controller, persistence, and local recording |
 | `src/styles.css` | Responsive visual system and Arabic rendering |
 | `scripts/serve.js` | Local static server |
 | `scripts/build.js` | Portable single-file HTML build |
 | `tests/engine.test.js` | Evidence separation, hints, delayed recall, scheduling, idempotency, validation |
 | `tests/controller.test.js` | Session/controller integration in a minimal DOM stub, persistence, rendering, and support fallback |
+| `tests/practice.test.js` | Focus planning, challenge signals, rehearsal separation, and profile migration |
 | `tests/browser.cjs` | Full user flow, persistence, mobile layout, recording, and accessible controls |
+
+See [VALIDATION.md](VALIDATION.md) for what has actually been run and what still needs browser verification.
 
 ## Product decisions carried forward
 
@@ -79,5 +96,6 @@ See `ROADMAP.md` for the next implementation milestones.
 
 - [Al Ramsa: Emirati Arabic and MSA](https://alramsa.ae/alramsa-faqs/) — course-variety context; not a verification of every phrase in this prototype.
 - [Karpicke and Roediger, 2008](https://web.mit.edu/jbelcher/www/learner/retrieval.pdf) — repeated retrieval and delayed vocabulary recall; does not validate this prototype's interval rules.
+- [Daniel Coyle on deep practice, Big Think Clips](https://youtu.be/vMyiySyx0AU) — design inspiration taken from a user-supplied transcript. Its anecdotes and numerical claims are not treated as validated product guarantees.
 
 No external image, font, audio, or AI service is required.
