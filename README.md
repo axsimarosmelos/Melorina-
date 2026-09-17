@@ -2,6 +2,21 @@
 
 An early working prototype of an adaptive Emirati Arabic learning application. The initial goal is useful everyday conversation. Each learner has separate, evolving evidence for individual words and abilities; there are no fixed beginner/intermediate/advanced placements.
 
+## Published app and project updates
+
+[Open Melorina on GitHub Pages](https://axsimarosmelos.github.io/Melorina-/).
+
+Publishing is configured from `main` at `/(root)`. Frontend updates pushed to that
+branch are picked up by GitHub Pages; publishing can take a few minutes. The
+`.nojekyll` file keeps the browser files as a plain static site.
+
+All project changes, including code and documentation, are maintained in this
+repository. See [AGENTS.md](AGENTS.md) for the project workflow.
+
+GitHub Pages serves the interface and text practice. AI voice still requires a
+separate backend with server-side OpenAI credentials; the current backend is for
+local use. See [voice setup](docs/voice-practice.md).
+
 ## Run
 
 Requires Node.js 22 or later. There are **no packages to install**.
