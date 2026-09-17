@@ -1,6 +1,6 @@
 # Melorina
 
-An early working prototype of an adaptive Emirati Arabic learning application. The initial goal is useful everyday conversation. Each learner has separate, evolving evidence for individual words and abilities; there are no fixed beginner/intermediate/advanced placements.
+An adaptive Emirati Arabic learning application, being prepared for an invited beta. The initial goal is useful everyday conversation. Each learner has separate, evolving evidence for individual words and abilities; there are no fixed beginner/intermediate/advanced placements.
 
 ## Published app and project updates
 
@@ -13,13 +13,19 @@ branch are picked up by GitHub Pages; publishing can take a few minutes. The
 All project changes, including code and documentation, are maintained in this
 repository. See [AGENTS.md](AGENTS.md) for the project workflow.
 
-GitHub Pages serves the interface and text practice. AI voice still requires a
-separate backend with server-side OpenAI credentials; the current backend is for
-local use. See [voice setup](docs/voice-practice.md).
+GitHub Pages serves the interface and text practice. Version 0.4 adds a separately
+hostable voice backend with invited accounts, persistent sessions and usage
+allowances, and a browser connection flow. **The backend is implemented but has
+not yet been deployed or live-tested.** Hosting access and an OpenAI key are needed.
+
+[Deploy the voice service to Render](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Faxsimarosmelos%2FMelorina-)
+— paid compute and persistent disk; review the price before confirming. OpenAI
+usage is separate. Follow [the activation guide](docs/deployment.md) to deploy,
+create your account and connect GitHub Pages. No API key belongs in the frontend.
 
 ## Run
 
-Requires Node.js 22 or later. There are **no packages to install**.
+Requires Node.js 24. There are **no packages to install**.
 
 ```sh
 node scripts/serve.js
@@ -27,7 +33,7 @@ node scripts/serve.js
 
 Open http://localhost:4173. The server binds only to your device. `PORT` can select another port.
 
-Alternatively, open `dist/melorina.html` directly in a browser after building it. Text practice works without a network connection. AI voice needs the local Node server and an OpenAI API key; a standalone file does not include a backend. Recording requires microphone access in a supported browser on localhost or HTTPS; file URLs vary by browser.
+Alternatively, open `dist/melorina.html` directly in a browser after building it. Text practice works without a network connection. AI voice needs a local or hosted Node server and an OpenAI API key; a standalone file does not include a backend. Recording requires microphone access in a supported browser on localhost or HTTPS; file URLs vary by browser.
 
 ```sh
 npm test
@@ -36,7 +42,7 @@ node scripts/build.js
 
 The included browser test uses Playwright when available: `node tests/browser.cjs`. Start the local server first. Playwright is an optional development tool, not an application dependency.
 
-## Enable voice practice (0.3)
+## Enable voice practice locally
 
 Copy `.env.example` to `.env`, set `OPENAI_API_KEY` on your own machine, then run:
 
@@ -52,7 +58,7 @@ Open `http://localhost:4173` and choose **Voice studio**. Pick a synthetic voice
 - **Voice conversation:** speak or type in a café, neighbour, or directions scenario; choose guided, everyday, or unexpected exchanges.
 - **Voice controls:** explicitly record and confirm repeat, slower, hint, next, or stop.
 
-AI voice usage is billed to the configured OpenAI account. The key stays on the server. See [voice setup, personalization, and data handling](docs/voice-practice.md). This is a local single-user server, not a production hosting setup.
+AI voice usage is billed to the configured OpenAI account. The key stays on the server. See [voice setup, personalization, and data handling](docs/voice-practice.md). The default development server is loopback-only. The hosted mode in [the deployment guide](docs/deployment.md) requires authentication and persistent storage.
 
 ## Try the adaptive loop
 
@@ -89,6 +95,8 @@ This loop applies ideas from Daniel Coyle's discussion of deep practice. See [th
 - Self-contained text-capable HTML build, dependency-free local API server, learning/controller/service tests, and optional browser-flow tests.
 - OpenAI-backed transcription, synthetic speech, and turn-based conversation; separate listening and spoken-word evidence.
 - Six voices, three coaching tones, pace controls, three conversation versions, sound families, and explicit voice controls.
+- Hosted accounts with invite-only registration, hashed passwords, expiring/revocable sessions, and per-account local learning profiles.
+- Persistent per-user and service-wide voice allowances, exact-origin CORS, a Render blueprint, and owner account recovery/revocation tools.
 
 ## Boundaries of this prototype
 
@@ -96,7 +104,7 @@ The text course is a guided prototype; Voice studio adds bounded AI conversation
 
 The review intervals and evidence labels are transparent starting rules, not a clinically or educationally validated learning model. No proficiency percentages or automatically inferred pronunciation scores are shown. The new listening tasks and confirmed spoken-word transcripts provide limited task evidence. Phonemes, sentence-level grammar, spontaneous conversation, and conversational transfer still need dedicated validation. Success in this app does not establish real-world speaking proficiency.
 
-Progress is local to one browser/origin and is not encrypted account storage. Opening a file and using localhost can create separate profiles. There is no sign-in, cloud sync, analytics, or payment handling. Text-only practice remains local. Enabling AI voice sends selected audio and conversation text through the local backend to OpenAI. Recordings and conversation history stay in page memory locally; provider data policies also apply. The interface explains this before voice use.
+Progress is local to one browser/origin and is not encrypted account storage. Opening a file and using localhost can create separate profiles. Hosted voice supports invited sign-in. There is no cloud progress sync, analytics, or payment handling. Browser history is separated per account and backend, not access-controlled against other people who use the same device. Text-only practice remains local. Enabling AI voice sends selected audio and conversation text through the configured backend to OpenAI. Recordings and conversation history stay in page memory locally; provider data policies also apply. The interface explains this before voice use.
 
 ## Structure
 
@@ -107,8 +115,13 @@ Progress is local to one browser/origin and is not encrypted account storage. Op
 | `src/practice.js` | Focus selection, recent-evidence support, and contextual follow-up planning |
 | `src/app.js` | Interface, guided session controller, persistence, and local recording |
 | `src/styles.css` | Responsive visual system and Arabic rendering |
-| `scripts/serve.js` | Launch the loopback-only local app and API server |
-| `server/app.js` | Bounded API routes, local-origin checks, and browser asset allowlist |
+| `scripts/serve.js` | Launch local development or authenticated hosted mode |
+| `server/app.js` | Bounded API routes, authentication, exact-origin CORS, and browser asset allowlist |
+| `server/store.js`, `server/config.js` | Persistent accounts/quotas and fail-closed hosted configuration |
+| `render.yaml`, `docs/deployment.md` | GitHub-linked hosting and activation instructions |
+| `src/config.js` | Public backend URL only; never secrets |
+| `scripts/accounts.js` | Owner-only account recovery, revocation and deletion |
+| `tests/hosted.test.js` | Hosted HTTP auth, isolation, quotas and restart persistence |
 | `server/openai.js` | Server-only OpenAI speech, transcription, and structured conversation adapter |
 | `src/voice-core.js` | Separate voice evidence, selection, preferences, pace, and commands |
 | `src/voice-client.js` | Recording, playback, API calls, and cancellation |

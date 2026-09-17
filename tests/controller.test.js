@@ -8,7 +8,7 @@ function boot(initialStorage){
   context.window=context;vm.createContext(context);
   for(const f of ['content','engine','practice','voice-core','voice-client','voice-ui'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/'+f+'.js'),'utf8'),context);
   let app=fs.readFileSync(path.join(__dirname,'../src/app.js'),'utf8');
-  app=app.replace('window.addEventListener(\'pagehide\',cleanupAudio);',"window.testAPI={startScenario,startPractice,startFocus,submitAnswer,next,navigate,record,retryTurn,skipRetry,showHint,state:()=>state,session:()=>session};window.addEventListener('pagehide',cleanupAudio);");
+  app=app.replace('window.addEventListener(\'pagehide\',cleanupAudio);',"window.testAPI={startScenario,startPractice,startFocus,submitAnswer,next,navigate,record,retryTurn,skipRetry,showHint,switchIdentity,state:()=>state,session:()=>session};window.addEventListener('pagehide',cleanupAudio);");
   vm.runInContext(app,context);
   return {api:context.testAPI,node,nodes,storage,html:()=>node('#app').innerHTML,click:key=>node(key).handlers.click()};
 }
@@ -90,4 +90,13 @@ test('support opens a visible recall clue without inventing hint use on recognit
   for(let i=0;i<4;i++){b.api.startScenario('hello');b.api.showHint();b.api.submitAnswer('marhaba');}
   b.api.startFocus('hello');assert.equal(b.api.session().hintLevel,1);assert.match(b.html(),/A small clue/);
   b.api.submitAnswer('marhaba');assert.equal(b.api.state().events.at(-1).outcome,'assisted');
+});
+
+test('switching learner accounts isolates local history and cancels the previous text session',()=>{
+ const b=boot();b.api.startScenario('hello');b.api.submitAnswer('marhaba');assert.equal(b.api.state().events.length,1);
+ b.api.switchIdentity('server:alice');assert.equal(b.api.state().events.length,0);assert.equal(b.api.session(),null);
+ b.api.startScenario('cafe');b.api.submitAnswer('Coffee',true);assert.equal(b.api.state().events.length,1);
+ b.api.switchIdentity('server:bravo');assert.equal(b.api.state().events.length,0);
+ b.api.switchIdentity('server:alice');assert.equal(b.api.state().events[0].word,'coffee');
+ b.api.switchIdentity(null);assert.equal(b.api.state().events[0].word,'hello');
 });

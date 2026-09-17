@@ -1,32 +1,62 @@
-# Validation — voice studio update, 2026-09-17
+# Validation — hosted voice update, 2026-09-17
 
 ## Passed
 
-`npm test` (`node --test tests/*.test.js`): **64 tests passed**.
+`npm test` (`node --test tests/*.test.js`): **80 tests passed** on Node 24.19.0.
+`npm run build` succeeded; all eight embedded browser scripts parse.
+No test calls a live OpenAI endpoint or spends API credits.
 
-The original 34 checks still cover text recognition/recall separation, hints, repairs, delayed retention, scheduling, profile migration, personal goals, escaped rendering, and the existing local recording fallback.
+The existing 64 tests cover learning evidence, hints/repairs, delayed reviews,
+profile migration, text controllers, voice practice, the provider adapter,
+explicit microphone uploads, completed playback, confirmation and cancellation.
 
-The voice update adds 30 checks covering:
+The hosted update adds 16 checks covering:
 
-- Separate listening/spoken evidence, completed playback and transcript confirmation requirements, idempotency, delayed recall, and rehearsals that preserve review dates.
-- Targeted word selection, sound filters, bounded opt-in pace following, and an explicit command vocabulary.
-- Actual local HTTP requests for asset allowlisting, missing credentials, rejected origins/hosts, malformed requests, request limits, and sanitized errors.
-- Mocked OpenAI request contracts for transcription, speech, and structured conversation; the expected word is not included in transcription prompts.
-- Mocked microphone/playback lifecycle, explicit uploads, late permission handling, cancellation, and stale network results.
-- Voice-controller flows for confirmation, uncertain transcripts, sound rehearsal, listening without answer leakage, commands, and conversation rendering without invented proficiency.
+- Fail-closed production configuration: HTTPS origins, persistent directory,
+  invitation secret and numeric limits; local mode cannot run in production.
+- Actual HTTP requests against the hosted server mode with an injected mock
+  provider: invited registration, account sessions, authorization before AI work,
+  allowed CORS preflights, denied origins/hosts/headers, and asset allowlisting.
+- Separate learner allowances, service-wide allowances, one-request-per-user
+  concurrency, and sanitized failures that still consume quota.
+- On-disk SQLite restart tests for accounts, sessions, expiry, throttling and
+  quotas; passwords and tokens are not stored in plaintext.
+- Password recovery preserves account identity, revokes sessions and rejects old
+  credentials; session revocation and account deletion also invalidate access.
+- Browser-client tests for an unconfigured Pages app, explicit HTTPS service
+  selection, per-origin tokens, no credential-bearing redirects, expired sessions,
+  corrupt preferences and stale logins after changing backend.
+- Controller tests for restarting cancelled connection checks, separate guest/account histories, sign-in plus consent
+  before voice use, and session-expiry cleanup without invented learning evidence.
 
-JavaScript syntax checks and parsing all seven embedded build scripts: passed. `node scripts/build.js` generated the portable HTML build. Tests use no paid OpenAI calls.
+Hosted HTTP tests use loopback transport and the configured Host/Origin headers.
+They verify application boundaries, not a real TLS proxy or Render deployment.
 
 ## Not verified
 
-**Live OpenAI requests have not run:** no `OPENAI_API_KEY` is configured in this workspace. The adapter uses documented endpoints and mocked contract tests. Model access, network connectivity, synthetic Emirati delivery, and real transcription quality still require a configured account and live verification.
+**Live deployment and OpenAI calls:** no backend has been provisioned from this
+workspace. Hosting integrations are disabled by its administrator, and no hosting
+credentials or `OPENAI_API_KEY` are available. The Render blueprint was prepared
+from the official documentation but has not been applied to a Render account.
+A real service URL must be set in `src/config.js` after deployment. Health checks
+confirm process/configuration availability, not a valid OpenAI key or model access.
+Follow [deployment](docs/deployment.md) for the concrete activation steps.
 
-**Real browser/device tests have not run:** Playwright is available, but Chromium is not installed. A previous browser download was denied by the environment network policy. `tests/browser.cjs` covers the text flow, and `tests/voice-browser.cjs` adds voice UI integration using fake microphone input and mocked API responses. Neither establishes browser correctness until run with an installed browser. Actual mobile layout, audio permissions, playback, recording codecs, and end-to-end interactions need device QA.
+**Real browser/device tests:** Playwright is available but Chromium is absent.
+An earlier browser download was denied by network policy. No browser/device test
+was executed for this release. `tests/browser.cjs` and `tests/voice-browser.cjs`
+remain optional checks; the latter uses mocked API replies and fake microphone
+input. Neither validates real speech quality. Minimal-DOM controller tests and
+mocked media tests do not establish layout, focus behavior, audio permissions,
+recording codec support, mobile playback, or end-to-end browser correctness.
 
-Controller tests use a minimal DOM stub; media tests use mocks. They do not replace browser or audio quality testing.
+**Language and effectiveness:** educator review is still required for the draft
+Emirati phrases, sound groups, accepted variants, generated responses and speech.
+Transcription matches do not establish pronunciation accuracy. No phoneme score,
+global proficiency score, or faster-learning guarantee is implemented. Review
+intervals and pace thresholds remain product heuristics.
 
-**Language and effectiveness are unvalidated:** teaching phrases, sound groups, accepted variants, AI replies, and generated speech need Emirati educator review. Transcript matches do not establish pronunciation accuracy. No phoneme score, global proficiency score, or faster-learning guarantee is implemented. Review timing and pace thresholds are product heuristics.
-
-## Scope
-
-Source, tests, setup instructions, and design notes are maintained in [axsimarosmelos/Melorina-](https://github.com/axsimarosmelos/Melorina-). GitHub storage does not host the voice backend. The current API server is loopback-only for one local user; public deployment requires authentication, HTTPS, per-user limits, and isolated storage.
+**Operations:** automatic offsite database backups, cloud progress sync, managed
+email recovery and multi-instance hosting are not configured. Voice accounts are
+invited accounts on a single persistent service. Learning evidence remains local
+to each browser/account profile. Usage units are not a hard dollar spending cap.

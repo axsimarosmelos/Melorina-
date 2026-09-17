@@ -1,0 +1,41 @@
+# Paid compute + persistent disk. Review the price in Render before deploying.
+# GitHub-linked updates are intentional for this owner's Melorina service.
+services:
+  - type: web
+    name: melorina-voice
+    runtime: node
+    plan: 0.5c-512mb
+    region: frankfurt
+    branch: main
+    buildCommand: npm test && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    maxShutdownDelaySeconds: 45
+    disk:
+      name: melorina-data
+      mountPath: /var/data/melorina
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: MELORINA_MODE
+        value: hosted
+      - key: MELORINA_DATA_DIR
+        value: /var/data/melorina
+      - key: MELORINA_ALLOWED_ORIGINS
+        value: https://axsimarosmelos.github.io
+      - key: MELORINA_APP_URL
+        value: https://axsimarosmelos.github.io/Melorina-/
+      - key: MELORINA_INVITE_CODE
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MELORINA_DAILY_UNITS
+        value: "80"
+      - key: MELORINA_GLOBAL_DAILY_UNITS
+        value: "1000"
+      - key: MELORINA_MAX_ACCOUNTS
+        value: "100"

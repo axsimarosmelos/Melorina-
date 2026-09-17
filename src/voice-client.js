@@ -1,12 +1,36 @@
 (function(root){
 'use strict';
 class VoiceClient{
- constructor(env=root){this.env=env;this.epoch=0;this.controllers=new Set();this.urls=new Set();this.player=null;this.recorder=null;this.stream=null;this.timer=null;this.pendingRecord=null;}
+ constructor(env=root){this.env=env;this.epoch=0;this.controllers=new Set();this.urls=new Set();this.player=null;this.recorder=null;this.stream=null;this.timer=null;this.pendingRecord=null;this.baseUrl='';this.token='';this.user=null;this.configure();}
+ configure(){
+  let saved='';try{saved=this.env.localStorage?.getItem('melorina.backend')||'';}catch{}
+  const location=this.env.location,defaultURL=this.env.MelorinaConfig?.apiBaseUrl||saved;
+  // Pages and standalone files have no same-origin API. Never guess a deployed hostname.
+  try{this.baseUrl=defaultURL?this.validOrigin(defaultURL):(location&&(location.protocol==='file:'||location.hostname?.endsWith('.github.io'))?null:'');}catch{this.baseUrl=null;}
+  this.restoreSession();
+ }
+ validOrigin(value){let url;try{url=new URL(value);}catch{throw Error('Enter the HTTPS address of your Melorina voice service.');}
+  if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||url.search||url.hash)throw Error('Use an HTTPS server address without a path.');return url.origin;
+ }
+ sessionKey(){return 'melorina.session:'+(this.baseUrl||this.env.location?.origin||'local');}
+ restoreSession(){this.token='';this.user=null;try{const saved=JSON.parse(this.env.sessionStorage?.getItem(this.sessionKey())||'null');if(saved?.expires>Date.now()&&/^[-\w]{43}$/.test(saved.token)){this.token=saved.token;if(saved.user&&/^[a-z0-9-]{36}$/.test(saved.user.id))this.user=saved.user;}}catch{}}
+ clearSession(){this.token='';this.user=null;try{this.env.sessionStorage?.removeItem(this.sessionKey());}catch{}}
+ setBackend(value){const base=this.validOrigin(value);this.cancel();this.clearSession();this.baseUrl=base;try{this.env.localStorage?.setItem('melorina.backend',base);}catch{}this.restoreSession();}
+ suggestedBackend(){try{return new URLSearchParams(this.env.location?.hash?.slice(1)).get('connect')||'';}catch{return '';}}
+ profileKey(){return this.user?encodeURIComponent(this.baseUrl||this.env.location?.origin||'local')+':'+this.user.id:null;}
+ async signIn(kind,credentials){if(!['login','register'].includes(kind))throw Error('Invalid sign-in action.');const epoch=this.epoch,key=this.sessionKey(),result=await this.request(kind,credentials);
+  if(epoch!==this.epoch)throw Error('Sign-in was cancelled.');
+  this.token=result.token;this.user=result.user;try{this.env.sessionStorage?.setItem(key,JSON.stringify(result));}catch{}return result.user;
+ }
+ async account(){const epoch=this.epoch;const result=await this.request('account');if(epoch!==this.epoch)throw Error('Connection changed.');this.user=result.user;return result;}
+ async signOut(){const pending=this.token?this.request('logout',{}):Promise.resolve();this.clearSession();await pending;}
  async request(path,body,raw=false,purpose='practice'){
-  const controller=new AbortController();this.controllers.add(controller);
+  if(this.baseUrl===null)throw Error('The voice service has not been connected yet. Text practice is ready.');
+  if(!['status','account','login','register','logout','speech','transcribe','conversation'].includes(path))throw Error('Unknown voice request.');
+  const controller=new AbortController();this.controllers.add(controller);const epoch=this.epoch;
   try{
-   const response=await this.env.fetch('/api/'+path,{method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':raw?body.type:'application/json','X-Melorina-Client':'voice-v1',...(raw?{'X-Melorina-Purpose':purpose}:{})},body:body===undefined?undefined:raw?body:JSON.stringify(body),signal:controller.signal});
-   if(!response.ok){let result;try{result=await response.json();}catch{}throw Error(result?.error||'Voice is temporarily unavailable. Please try again.');}
+   const response=await this.env.fetch((this.baseUrl||'')+'/api/'+path,{method:body===undefined?'GET':'POST',mode:'cors',credentials:'omit',redirect:'error',headers:{...(this.token&&!['status','login','register'].includes(path)?{Authorization:'Bearer '+this.token}:{}),...(body===undefined?{}:{'Content-Type':raw?body.type:'application/json','X-Melorina-Client':'voice-v1',...(raw?{'X-Melorina-Purpose':purpose}:{})})},body:body===undefined?undefined:raw?body:JSON.stringify(body),signal:controller.signal});
+   if(!response.ok){let result;try{result=await response.json();}catch{}if(response.status===401&&!['login','register'].includes(path)&&epoch===this.epoch)this.clearSession();const error=Error(result?.error||'Voice is temporarily unavailable. Please try again.');error.status=response.status;throw error;}
    return path==='speech'?await response.blob():await response.json();
   }finally{this.controllers.delete(controller);}
  }

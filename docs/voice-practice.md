@@ -1,10 +1,13 @@
-# Voice practice in Melorina 0.3
+# Voice practice in Melorina 0.4
 
 The initial Emirati Arabic course now has an OpenAI-backed voice studio. This is turn-based speech: record, check the transcript, then receive a reply. It is not a continuous hands-free call.
 
+For hosted accounts and the GitHub Pages connection, see [deployment](deployment.md).
+The hosted service is deployable but has not been activated from this workspace.
+
 ## Try it locally
 
-Requires Node.js 22 or newer. No runtime packages are required.
+Requires Node.js 24. No runtime packages are required.
 
 1. Copy `.env.example` to `.env` on your own machine.
 2. Set `OPENAI_API_KEY` in `.env`. Never put a real key in a browser field, chat, screenshot, or GitHub commit.
@@ -14,7 +17,7 @@ Requires Node.js 22 or newer. No runtime packages are required.
 
 `npm start` also works if `OPENAI_API_KEY` is already present in the server environment. Without a key, existing text practice works and voice studio explains setup. The standalone HTML export cannot provide its own API backend.
 
-API usage is charged to the configured OpenAI account. Use account usage limits. The local service also limits request size, concurrency, and request frequency, but those limits are not a billing cap. This server is for one local user and listens on `127.0.0.1`. Public hosting needs authentication, HTTPS, user isolation, and per-user quotas before deployment.
+API usage is charged to the configured OpenAI account. Use account usage limits. The local service also limits request size, concurrency, and request frequency, but those limits are not a billing cap. This server is for one local user and listens on `127.0.0.1`. Hosted mode adds invited accounts, persistent sessions and per-user/service quotas. Use the deployment blueprint; never expose local mode publicly.
 
 ## The learning loop
 
@@ -47,15 +50,16 @@ Controls are explicit and separate from practice answers. Tap **Record a command
 | Data | Handling |
 | --- | --- |
 | API key | Read by the Node server; never returned to the browser or included in the build |
-| Microphone recording | Kept in page memory until the learner chooses Transcribe; then sent through the local server to OpenAI |
+| Microphone recording | Kept in page memory until the learner chooses Transcribe; then sent through the configured server to OpenAI |
 | Transcript | Shown for confirmation; a mismatch or discarded transcript does not count as failure |
 | Conversation | Recent turns sent to OpenAI; local history stays in memory and is cleared on leaving the studio |
-| Learning evidence and preferences | Stored locally with existing progress; included in progress export and reset |
+| Learning evidence and preferences | Stored in the current browser profile; hosted accounts have separate local profiles; included in export/reset |
+| Hosted account | Username, salted password hash, hashed sessions and usage counters in persistent SQLite; no learning-history cloud sync |
 | AI-generated audio | Returned for playback and discarded from client object URLs on cancellation/navigation |
 
 The app does not write audio, transcripts, or raw API request logs to disk. OpenAI has its own [API data controls and retention policies](https://developers.openai.com/api/docs/guides/your-data). Conversation requests use `store: false`; that is not a blanket claim of zero provider retention. Turning voice off cancels pending work but cannot retract data already sent.
 
-The server rejects foreign origins and unexpected hosts, requires a custom header for API writes, bounds audio to 6 MiB and JSON to 24 KB, limits requests to 30 per minute and two concurrently, and serves only browser assets. It does not expose `.env`, server source, or arbitrary project files. Upstream errors are sanitized. Generated text is rendered as escaped text.
+The server rejects foreign origins and unexpected hosts, requires a custom header for API writes, bounds audio to 6 MiB and JSON to 24 KB, limits local requests to 30 per minute and two concurrently (hosted per-account limits are documented in [deployment](deployment.md)), and serves only browser assets. It does not expose `.env`, server source, or arbitrary project files. Upstream errors are sanitized. Generated text is rendered as escaped text.
 
 ## OpenAI integration
 

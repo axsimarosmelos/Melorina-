@@ -18,3 +18,9 @@ code, tests, setup instructions, design decisions, and documentation.
 - GitHub Pages does not run the Node/OpenAI backend. Do not claim AI voice is live
   there until a separately hosted, authenticated backend has been connected and
   tested. Keep setup and deployment documentation accurate.
+- Hosted deployment uses `render.yaml`, a single Node 24 service and persistent
+  SQLite storage. Preserve invitation gating, auth, exact-origin checks and quotas.
+- Never invent the backend hostname. Set `src/config.js` only after the actual
+  HTTPS origin is known and verified. The deployment guide records activation.
+- Hosted accounts currently separate local browser profiles; do not claim cloud
+  synchronization of learning progress.

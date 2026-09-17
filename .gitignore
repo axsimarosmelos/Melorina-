@@ -6,3 +6,7 @@ dist/
 test-results/
 *.log
 .DS_Store
+
+data/
+*.sqlite
+*.sqlite-*

@@ -16,6 +16,20 @@ Implemented: a local server with server-only OpenAI credentials, explicit audio 
 
 Automatic pace following is optional and coarse. Sound practice does not claim phoneme assessment. Live OpenAI and device validation remain pending; see [voice practice](docs/voice-practice.md) and [validation](VALIDATION.md).
 
+## 0.4 — Separately hostable voice service
+
+Implemented: invited username/password accounts; server-side password hashes and
+revocable sessions; persistent per-user and global request allowances; exact-origin
+CORS; authenticated GitHub Pages connection; separate browser profiles for each
+account/backend; owner account recovery, revocation and deletion; Render Blueprint
+with a persistent disk and test-gated build.
+
+Activation remains pending: hosting is disabled by the workspace administrator,
+and no hosting credentials or OpenAI key are configured here. Follow
+[deployment](docs/deployment.md). The hosted app and real audio need live/device
+validation. Accounts do not yet cloud-sync learning evidence. This release is an
+invited beta, not an unrestricted public learning launch.
+
 ## Next — Validate the Emirati learning content
 
 - Engage an Emirati language educator to review wording, regional variants, gender/register, accepted answers, and cultural context.
@@ -29,8 +43,8 @@ Exit criterion: every released task and audio item has an identifiable language 
 
 ## Next — Production conversations and durable accounts
 
-- Extend the local API backend with authenticated users, sessions, events, content versions, learner goals, and learner skill estimates before public deployment.
-- Preserve the server-only provider adapter and add per-user quotas, production authentication, and controlled realtime voice sessions.
+- Extend hosted accounts with durable learning events, content versions, learner goals, and learner skill estimates.
+- Preserve the provider adapter, authentication and quota boundaries; add managed account recovery and validated realtime voice sessions.
 - Let the curriculum selector choose a goal and evidence target; let the conversation service express that goal naturally. Constrain generated exercises to reviewed content and validate their answers.
 - Keep event IDs idempotent, preserve hints and source confidence, and support account export/deletion.
 - Replace the one-page session controller with resumable sessions and add conflict-safe persistence across devices.
