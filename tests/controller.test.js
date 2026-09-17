@@ -6,7 +6,7 @@ function boot(initialStorage){
   const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',value:'',handlers:{},classList:{add(){},remove(){}},addEventListener(e,f){this.handlers[e]=f;},focus(){},querySelectorAll(){return [];}});return nodes.get(key);};
   const context={console,Date,Math,JSON,Set,Map,Blob,URL,setTimeout:()=>1,clearTimeout(){},navigator:{},document:{querySelector:node,querySelectorAll:()=>[]},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},crypto:{randomUUID:require('node:crypto').randomUUID},addEventListener(){},scrollTo(){}};
   context.window=context;vm.createContext(context);
-  for(const f of ['content','engine','practice'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/'+f+'.js'),'utf8'),context);
+  for(const f of ['content','engine','practice','voice-core','voice-client','voice-ui'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/'+f+'.js'),'utf8'),context);
   let app=fs.readFileSync(path.join(__dirname,'../src/app.js'),'utf8');
   app=app.replace('window.addEventListener(\'pagehide\',cleanupAudio);',"window.testAPI={startScenario,startPractice,startFocus,submitAnswer,next,navigate,record,retryTurn,skipRetry,showHint,state:()=>state,session:()=>session};window.addEventListener('pagehide',cleanupAudio);");
   vm.runInContext(app,context);

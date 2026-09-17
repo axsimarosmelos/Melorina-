@@ -1,27 +1,32 @@
-# Validation — 2026-09-17
+# Validation — voice studio update, 2026-09-17
 
 ## Passed
 
-`npm test` (`node --test tests/engine.test.js tests/controller.test.js tests/practice.test.js`): **34 tests passed**.
+`npm test` (`node --test tests/*.test.js`): **64 tests passed**.
 
-These cover separate recognition/recall evidence, supported answers, duplicate submissions, delayed retention, review scheduling, aliases, invalid state, scenario references, a full guided session with adaptive revisit, persisted progress, rendered screen generation, escaped user content, and the unsupported-recording fallback.
+The original 34 checks still cover text recognition/recall separation, hints, repairs, delayed retention, scheduling, profile migration, personal goals, escaped rendering, and the existing local recording fallback.
 
-Version 0.2 adds checks for recent per-word/task support decisions, recognition misses that do not advance to recall, progressive hint evidence, bounded and skippable retries, rehearsals that preserve skill estimates and review dates, contextual follow-up selection, old-profile compatibility, visible versus invented hint use, and persisted personal goals.
+The voice update adds 30 checks covering:
 
-JavaScript syntax checks and parsing all four embedded build scripts: passed.
+- Separate listening/spoken evidence, completed playback and transcript confirmation requirements, idempotency, delayed recall, and rehearsals that preserve review dates.
+- Targeted word selection, sound filters, bounded opt-in pace following, and an explicit command vocabulary.
+- Actual local HTTP requests for asset allowlisting, missing credentials, rejected origins/hosts, malformed requests, request limits, and sanitized errors.
+- Mocked OpenAI request contracts for transcription, speech, and structured conversation; the expected word is not included in transcription prompts.
+- Mocked microphone/playback lifecycle, explicit uploads, late permission handling, cancellation, and stale network results.
+- Voice-controller flows for confirmation, uncertain transcripts, sound rehearsal, listening without answer leakage, commands, and conversation rendering without invented proficiency.
 
-`node scripts/build.js`: generated a standalone HTML file with inlined application code and styles and no runtime package dependencies.
+JavaScript syntax checks and parsing all seven embedded build scripts: passed. `node scripts/build.js` generated the portable HTML build. Tests use no paid OpenAI calls.
 
-## Not verified in this environment
+## Not verified
 
-The Playwright browser test is included in `tests/browser.cjs` but could not run because no browser binary was installed. Downloading the browser was denied by the environment's network policy. Therefore, actual browser layout, mobile rendering, microphone capture/playback, and the end-to-end DOM flow still need browser verification.
+**Live OpenAI requests have not run:** no `OPENAI_API_KEY` is configured in this workspace. The adapter uses documented endpoints and mocked contract tests. Model access, network connectivity, synthetic Emirati delivery, and real transcription quality still require a configured account and live verification.
 
-The browser test now includes personal goals, focused practice, gradual hints, and hidden-model repair on mobile. These browser assertions have not been executed successfully in this environment.
+**Real browser/device tests have not run:** Playwright is available, but Chromium is not installed. A previous browser download was denied by the environment network policy. `tests/browser.cjs` covers the text flow, and `tests/voice-browser.cjs` adds voice UI integration using fake microphone input and mocked API responses. Neither establishes browser correctness until run with an installed browser. Actual mobile layout, audio permissions, playback, recording codecs, and end-to-end interactions need device QA.
 
-Controller tests use a minimal DOM stub. They do not replace browser tests or establish that recording works on a particular device.
+Controller tests use a minimal DOM stub; media tests use mocks. They do not replace browser or audio quality testing.
 
-Emirati teaching content is draft; no native educator review or pronunciation assessment validation has taken place. Review timing is a prototype heuristic, and learning effectiveness has not been measured.
+**Language and effectiveness are unvalidated:** teaching phrases, sound groups, accepted variants, AI replies, and generated speech need Emirati educator review. Transcript matches do not establish pronunciation accuracy. No phoneme score, global proficiency score, or faster-learning guarantee is implemented. Review timing and pace thresholds are product heuristics.
 
-## Repository
+## Scope
 
-Project destination: [axsimarosmelos/Melorina-](https://github.com/axsimarosmelos/Melorina-). The repository contains source, tests, build tools, and documentation. Generate the portable HTML build with `node scripts/build.js`. Hosting and deployment are separate from storing the source on GitHub.
+Source, tests, setup instructions, and design notes are maintained in [axsimarosmelos/Melorina-](https://github.com/axsimarosmelos/Melorina-). GitHub storage does not host the voice backend. The current API server is loopback-only for one local user; public deployment requires authentication, HTTPS, per-user limits, and isolated storage.

@@ -4,7 +4,7 @@ An early working prototype of an adaptive Emirati Arabic learning application. T
 
 ## Run
 
-Requires Node.js 18 or later. There are **no packages to install**.
+Requires Node.js 22 or later. There are **no packages to install**.
 
 ```sh
 node scripts/serve.js
@@ -12,7 +12,7 @@ node scripts/serve.js
 
 Open http://localhost:4173. The server binds only to your device. `PORT` can select another port.
 
-Alternatively, open `dist/melorina.html` directly in a browser after building it. The main app works without a network connection. Recording requires microphone access in a supported browser on localhost or HTTPS; file URLs vary by browser.
+Alternatively, open `dist/melorina.html` directly in a browser after building it. Text practice works without a network connection. AI voice needs the local Node server and an OpenAI API key; a standalone file does not include a backend. Recording requires microphone access in a supported browser on localhost or HTTPS; file URLs vary by browser.
 
 ```sh
 npm test
@@ -20,6 +20,24 @@ node scripts/build.js
 ```
 
 The included browser test uses Playwright when available: `node tests/browser.cjs`. Start the local server first. Playwright is an optional development tool, not an application dependency.
+
+## Enable voice practice (0.3)
+
+Copy `.env.example` to `.env`, set `OPENAI_API_KEY` on your own machine, then run:
+
+```sh
+npm run start:voice
+```
+
+Open `http://localhost:4173` and choose **Voice studio**. Pick a synthetic voice, coaching tone, pace, conversation version, and sound focus. Enable AI voice for this visit.
+
+- **Listen & recognise:** hear a word before seeing its written form; replay or reveal help when needed.
+- **Say it yourself:** record a word, explicitly send it for transcription, then confirm what was heard.
+- **Sound workshop:** hear a model, record and compare, and rehearse a small part without invented pronunciation scores.
+- **Voice conversation:** speak or type in a café, neighbour, or directions scenario; choose guided, everyday, or unexpected exchanges.
+- **Voice controls:** explicitly record and confirm repeat, slower, hint, next, or stop.
+
+AI voice usage is billed to the configured OpenAI account. The key stays on the server. See [voice setup, personalization, and data handling](docs/voice-practice.md). This is a local single-user server, not a production hosting setup.
 
 ## Try the adaptive loop
 
@@ -52,16 +70,18 @@ This loop applies ideas from Daniel Coyle's discussion of deep practice. See [th
 - Recent evidence for each word and task guides support; personal conversation goals persist across sessions.
 - Bounded within-session adaptation and a persistent review queue. Same-session repetition cannot establish durable retention.
 - Local progress persistence; JSON export; user-confirmed local reset.
-- Optional microphone recording and replay. Audio remains in memory, is never uploaded, and is discarded when leaving a turn. This is not speech recognition or pronunciation scoring.
-- Self-contained HTML build, dependency-free development server, engine tests, and browser-flow tests.
+- Text lessons retain optional local-only microphone recording and replay. Voice studio separately supports explicit transcription uploads. Neither provides pronunciation scores.
+- Self-contained text-capable HTML build, dependency-free local API server, learning/controller/service tests, and optional browser-flow tests.
+- OpenAI-backed transcription, synthetic speech, and turn-based conversation; separate listening and spoken-word evidence.
+- Six voices, three coaching tones, pace controls, three conversation versions, sound families, and explicit voice controls.
 
 ## Boundaries of this prototype
 
-This is a guided text prototype, not an open-ended AI tutor. Eight words/phrases and three authored scenarios make the adaptive behavior inspectable. Phrase matching may not recognise other valid Arabic expressions. Transliteration is approximate and not a pronunciation reference. The content is **draft and requires review by an Emirati Arabic educator before public release**. Some phrases are shared with other Arabic varieties; the intended course variety is Emirati Arabic.
+The text course is a guided prototype; Voice studio adds bounded AI conversations when configured. Eight words/phrases and three authored scenarios make the adaptive behavior inspectable. Phrase matching may not recognise other valid Arabic expressions. Transliteration is approximate and not a pronunciation reference. The content is **draft and requires review by an Emirati Arabic educator before public release**. Some phrases are shared with other Arabic varieties; the intended course variety is Emirati Arabic.
 
-The review intervals and evidence labels are transparent starting rules, not a clinically or educationally validated learning model. No proficiency percentages or automatically inferred pronunciation scores are shown. Listening, phonemes, sentence-level grammar, spontaneous conversation, and conversational transfer need dedicated assessments. Success in this app does not establish real-world speaking proficiency.
+The review intervals and evidence labels are transparent starting rules, not a clinically or educationally validated learning model. No proficiency percentages or automatically inferred pronunciation scores are shown. The new listening tasks and confirmed spoken-word transcripts provide limited task evidence. Phonemes, sentence-level grammar, spontaneous conversation, and conversational transfer still need dedicated validation. Success in this app does not establish real-world speaking proficiency.
 
-Progress is local to one browser/origin and is not encrypted account storage. Opening a file and using localhost can create separate profiles. There is no sign-in, cloud sync, analytics, payment handling, or backend. The prototype sends no learner data to a server. The learning content sources link is optional and opens only on user action.
+Progress is local to one browser/origin and is not encrypted account storage. Opening a file and using localhost can create separate profiles. There is no sign-in, cloud sync, analytics, or payment handling. Text-only practice remains local. Enabling AI voice sends selected audio and conversation text through the local backend to OpenAI. Recordings and conversation history stay in page memory locally; provider data policies also apply. The interface explains this before voice use.
 
 ## Structure
 
@@ -72,12 +92,19 @@ Progress is local to one browser/origin and is not encrypted account storage. Op
 | `src/practice.js` | Focus selection, recent-evidence support, and contextual follow-up planning |
 | `src/app.js` | Interface, guided session controller, persistence, and local recording |
 | `src/styles.css` | Responsive visual system and Arabic rendering |
-| `scripts/serve.js` | Local static server |
+| `scripts/serve.js` | Launch the loopback-only local app and API server |
+| `server/app.js` | Bounded API routes, local-origin checks, and browser asset allowlist |
+| `server/openai.js` | Server-only OpenAI speech, transcription, and structured conversation adapter |
+| `src/voice-core.js` | Separate voice evidence, selection, preferences, pace, and commands |
+| `src/voice-client.js` | Recording, playback, API calls, and cancellation |
+| `src/voice-ui.js` | Voice studio, consent, transcript confirmation, and practice flows |
 | `scripts/build.js` | Portable single-file HTML build |
 | `tests/engine.test.js` | Evidence separation, hints, delayed recall, scheduling, idempotency, validation |
 | `tests/controller.test.js` | Session/controller integration in a minimal DOM stub, persistence, rendering, and support fallback |
 | `tests/practice.test.js` | Focus planning, challenge signals, rehearsal separation, and profile migration |
-| `tests/browser.cjs` | Full user flow, persistence, mobile layout, recording, and accessible controls |
+| `tests/browser.cjs` | Text user flow, persistence, mobile layout, recording, and accessible controls |
+| `tests/voice-*.test.js`, `tests/server.test.js` | Voice evidence, mocked media/API flows, local HTTP boundaries, and cancellation |
+| `tests/voice-browser.cjs` | Optional real-browser voice flow with mocked OpenAI endpoints |
 
 See [VALIDATION.md](VALIDATION.md) for what has actually been run and what still needs browser verification.
 
@@ -98,4 +125,4 @@ See `ROADMAP.md` for the next implementation milestones.
 - [Karpicke and Roediger, 2008](https://web.mit.edu/jbelcher/www/learner/retrieval.pdf) — repeated retrieval and delayed vocabulary recall; does not validate this prototype's interval rules.
 - [Daniel Coyle on deep practice, Big Think Clips](https://youtu.be/vMyiySyx0AU) — design inspiration taken from a user-supplied transcript. Its anecdotes and numerical claims are not treated as validated product guarantees.
 
-No external image, font, audio, or AI service is required.
+Text practice requires no external image, font, audio, or AI service. AI voice features require OpenAI API access and an internet connection.

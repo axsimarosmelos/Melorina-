@@ -10,21 +10,27 @@ Implemented: three-turn focused practice; support based on recent evidence for e
 
 Design source and boundaries: [Deep practice in Melorina](docs/deep-practice.md). Automated checks are documented in [VALIDATION.md](VALIDATION.md); browser verification remains outstanding.
 
-## 0.3 — Validate the Emirati learning content
+## 0.3 — Voice studio and API integration
+
+Implemented: a local server with server-only OpenAI credentials, explicit audio uploads, learner-confirmed transcripts, synthetic speech, listening recognition, spoken-word practice, sound rehearsal, turn-based AI conversations, selectable voices/tones/pace, three conversation versions, and explicit voice commands. Voice evidence is separate from text evidence; conversation feedback does not automatically become proficiency evidence.
+
+Automatic pace following is optional and coarse. Sound practice does not claim phoneme assessment. Live OpenAI and device validation remain pending; see [voice practice](docs/voice-practice.md) and [validation](VALIDATION.md).
+
+## Next — Validate the Emirati learning content
 
 - Engage an Emirati language educator to review wording, regional variants, gender/register, accepted answers, and cultural context.
 - Record consented, reusable native audio from multiple speakers and add a content review status/version for each phrase.
 - Let learners observe a reviewed model at a natural and slower pace, isolate the part they need, then return to the whole utterance.
-- Add listening-only tasks that never expose the answer in text; track auditory recognition separately from reading.
+- Validate the new listening-only tasks and expand them beyond the eight-word draft; preserve separation from reading evidence.
 - Expand conversations from isolated words to utterance-level goals, including asking for clarification and handling an unexpected reply.
 - Add tests for acceptable alternative expressions, and send uncertain text judgments to a fallback rather than marking them wrong.
 
 Exit criterion: every released task and audio item has an identifiable language reviewer and expected, acceptable, and unsupported answer cases.
 
-## 0.4 — Open-ended conversation and durable accounts
+## Next — Production conversations and durable accounts
 
-- Add a backend with authenticated users, sessions, events, content versions, learner goals, and learner skill estimates.
-- Keep API credentials exclusively server-side. Use a provider adapter for text generation, speech transcription, and feedback.
+- Extend the local API backend with authenticated users, sessions, events, content versions, learner goals, and learner skill estimates before public deployment.
+- Preserve the server-only provider adapter and add per-user quotas, production authentication, and controlled realtime voice sessions.
 - Let the curriculum selector choose a goal and evidence target; let the conversation service express that goal naturally. Constrain generated exercises to reviewed content and validate their answers.
 - Keep event IDs idempotent, preserve hints and source confidence, and support account export/deletion.
 - Replace the one-page session controller with resumable sessions and add conflict-safe persistence across devices.
